@@ -14,23 +14,21 @@
 - **年份/会刊：** {{YEAR}} / #CVPR #ICCV #ECCV #Arxiv
 - **领域标签：** #CV/{{分类/检测/分割/底层}} 
 - **核心痛点 (Motivation)：**
-    - 前人方法的局限性是什么？这篇论文为什么要写？
+    - 
 - **核心贡献 (Key Idea)：**
-    - 一句话总结创新点（例如：引入了新的 Attention 机制、提出了更轻量的 Loss）。
+    - 
 - **代码仓库：** [GitHub Link]
 - **是否值得精读：** 🟢 必读 / 🟡 略读 / 🔴 仅作参考
 
 ---
 
-## 2. 核心架构与数据流 (Architecture & Data Flow)
+## 2. 核心架构与数据流 (Architecture & Data Flow)/内容整理
 > **提示：** 利用 Zotero 的截图功能，将模型结构图、流程图贴在此处。
 
 - **模型结构图：**
   
 - **张量变化 (Tensor Shapes - 重点)：**
-    - Input: (Batch, 3, H, W)
-    - Stage 1 (Stem/Encoder): (...) -> (...)
-    - Final Output: (...)
+    -
 
 ---
 
@@ -61,7 +59,7 @@
 
 ## 4. 数学表达与代码复现 (Math & Code)
 - **核心公式：**
-  $$L_{total} = \lambda_1 L_{cls} + \lambda_2 L_{reg}$$
+
 - **代码核心逻辑 (GitHub Snippets)：**
 ```python
 # 记录复现时发现的论文核心函数实现逻辑
@@ -78,7 +76,7 @@ def forward(self, x):
 
 - [ ] **基础概念补课 (用 Obsidian 双链链接)：**
     - 
-- [ ] **遇到的坑：** - 例如：环境配置中 CUDA 版本不匹配、权重文件下载极慢、显存炸了(OOM)等。
+- [ ] **遇到的坑：** 
     
 - [ ] 准备问师兄的问题：
     
