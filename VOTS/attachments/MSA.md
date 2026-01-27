@@ -1,0 +1,1 @@
+![[Pasted image 20260120145251.png]]Dosovitskiy, Alexey, Lucas Beyer, Alexander Kolesnikov, 等. 《An Image Is Worth 16x16 Words: Transformers for Image Recognition at Scale》. arXiv:2010.11929. 预印本, arXiv, 2021年6月3日. [https://doi.org/10.48550/arXiv.2010.11929](https://doi.org/10.48550/arXiv.2010.11929).
