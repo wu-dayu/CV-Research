@@ -13,7 +13,7 @@
 ## 1. 快速预览 (Quick Read - 10min)
 - **年份/会刊：** {{2025}} /  #Arxiv
 - **领域标签：** #CV/{{底层}} 
-- **核心痛点 (Motivation)：**
+- **核心痛点 (Motivation)：**[DINOv2的weakness](https://docs.google.com/document/d/1CaADcs6hwx3n9SCqUfuVeMieiPUqMDzkomSHWTPnHe0/edit?tab=t.0)
 - **核心贡献 (Key Idea)：**
 - **代码仓库：** [GitHub Link](https://github.com/facebookresearch/dinov3)
 - **是否值得精读：** 🟢 必读 
@@ -28,6 +28,14 @@
 		3. “we use raw publicly available computer vision datasets including ImageNet1k (Deng et al., 2009), ImageNet22k (Russakovsky et al., 2015), and Mapillary Street-level Sequences (Warburg et al., 2020). This final part allows us to optimize our model’s performance, following Oquab et al. (2024).” 
 	- 数据混合
 		Batch的组成：**Batch 组成**：在训练过程中，**10%** 的 Batch 是纯 ImageNet-1k 数据（同质化 Batch），其余 **90%** 则是混合了所有数据源的异构 Batch 。
+	- **Batch 的真实结构（张量维度）** by Gemini
+		如果你设置 `Batch Size = B`（比如 $B=64$），那么在一个训练步骤中：
+		- 原始图片数量：$B$ 张。
+		- **送到 GPU 的张量（Tensor）**：
+			- **Global Tensor**: 形状为 $(2B, 3, 224, 224)$。因为每张原始图贡献了 2 个全局块。
+			- **Local Tensor**: 形状为 $(8B, 3, 96, 96)$。因为每张原始图贡献了 8 个局部块。
+			 注：对于Gram Loss，模型**可能**保存了高/低分辨率的两套Global Tensor
+			 **总结：** 在代码层面，通常会把所有的 Crops 拼接在一起。所以一个 Batch 实际上是由 **$B \times (2+8)$** 个图像块组成的巨大张量。
 - 3.2 自监督大规模训练
 	1. 学习目标的融合与改进 (Learning Objective)
 		研究者并没有完全推翻 DINOv2 的架构，而是进行了精细的优化 ：
@@ -55,6 +63,33 @@
 			        - 在**数据预处理阶段**（DataLoader）进行切片。
 			        - 在 **Transformer 的输入层**（Patch Embedding）将这些切片变成 Token 序列。
 - 4. 本模型最大创新---Gram Anchoring
+	- 问题的出现
+		“Throughout our experiments, we have identified a relative independence between learning strong discriminative features and maintaining local consistency, as observed in the lack of correlation between global and dense performance. While combining the global DINO loss with the local iBOT loss has begun to address this issue, we observe that the balance is unstable, with global representation dominating as training progresses.” 
+	- Gram Matrix
+		- $G=X\cdot X^T$ ; dim=($d,d$)
+		- [Gram 矩阵元素详解与几何意义](https://docs.google.com/document/d/1rjdu0pAiD7k2zz7k4oI5_aThhL9hUwRgeBPtVPF08Uw/edit?tab=t.0)
+			- $$G_{i,j} = \frac{1}{N} \sum_{k=1}^{N} F_{k,i} \cdot F_{k,j}$$
+				- 它取出了特征图中所有的 Token
+				- 它关注的是第 $i$ 个维度和第 $j$ 个维度
+				- 它把这 $N$ 个位置上，这两个维度的数值分别相乘并求平均（此处的N同$p$, an image is composed of $p$ patches/ $N$ tokens）
+				- 物理意义：这其实就是在计算特征通道 $i$ 和通道 $j$ 之间的协方差（相关性）
+				- 如果 $G_{i,j}$ 的值很高，说明在这张图中，i通道表示的特征经常和d通道表示的特征一起出现
+	-  损失函数公式：$$L_{Gram}=\left|\left|X_S\cdot X_S^T-X_G\cdot X_G^T\right|\right|_F^2$$
+		其中$X_S$和$X_T$矩阵是$p×d$ matrix of **$L_2$-normalized** local features of student and teacher.
+		Computed only on global crops; start after 1M iterations
+	- 初步发现：“Interestingly, we observe that the late application of LGram still manages to “repair” very degraded local features.” 
+	- 在Refinement Step每10k interations 更新Gram Teacher与main EMA teacher一致。 
+- 4.3 Leveraging Higher-Resolution Features in Gram Anchoring
+	- We only compute Gram loss on the global crops
+	- 确定采样区域，双路并行采样
+		- 数据加载器在原始高分辨率大图上随机选定一个矩形区域 $R$
+		- **学生路径 (Student Path)**：将区域 $R$ 裁剪出来并缩放到 **$224 \times 224$**。随后进行颜色抖动、高斯模糊等常规增强。
+		- **老师路径 (Gram Teacher Path)**：将**同一个区域 $R$** 裁剪出来并缩放到 **$448 \times 448$**（甚至更高）。
+	- 特征提取与下采样平滑
+		- 学生路径输出低分辨率特征图 $X_S$
+		- 老师路径输出高分辨率特征图，并利用**Bicubic插值**将高分辨率图转化为低分辨率
+			*这一步通过插值平均了周围像素，使得得到的特征图 $F_{tea}^{smooth}$ ($X_T$)既保留了高分辨率带来的边缘细节，又消除了单像素的随机噪声。*
+	- 计算Gram Loss
 ---
 
 ## 3. 深度技术检查清单 (Direction-Specific Checklist)
@@ -68,7 +103,9 @@
 
 ## 4. 数学表达与代码复现 (Math & Code)
 - **核心公式：**
-  $$L_{total} = \lambda_1 L_{cls} + \lambda_2 L_{reg}$$
+  $$L_{Gram}=\left|\left|X_S\cdot X_S^T-X_G\cdot X_G^T\right|\right|_F^2$$
+ Initial train phase:$$L_{Pre} = L_{DINO} + L_{iBOT}+0.1*L_{DKoleo}$$
+  Refinement Step:$$L_{Ref} = \omega_D L_{DINO} + L_{iBOT}+\omega_{DK}L_{DKoleo}+\omega_{Gram}L_{Gram}$$
 - **代码核心逻辑 (GitHub Snippets)：**
 ```python
 # 记录复现时发现的论文核心函数实现逻辑
@@ -155,6 +192,7 @@ def forward(self, x):
 		    2. **检测（Detection）**：接一个检测头（如 Faster R-CNN）。
 		    3. **分割（Segmentation）**：接一个分割头。
 		- **核心逻辑**：如果 DINOv3 的 "downstream performance" 好，说明这个“底座”提取的特征非常全能，稍微加个“头”就能在特定任务上拿高分。
+	- [[Cosine Map]]
 - [ ] **遇到的坑：**
 - [ ] 准备问师兄的问题：
 ---
