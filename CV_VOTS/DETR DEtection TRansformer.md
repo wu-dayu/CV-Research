@@ -46,6 +46,7 @@
    全部用于预测的FFN共享参数
 - Auxiliary decoding loss
 	- “We found helpful to use auxiliary losses [1] in decoder during training, especially to help the model output the correct number of objects of each class. We add prediction FFNs and Hungarian loss after each decoder layer” (Carion 等, 2020, p. 7)
+- Drawback: 训练时间长
 - **张量变化 (Tensor Shapes - 重点)：**
     - [DETR 论文精读 bilibili video](https://www.bilibili.com/video/BV1GB4y1X72R/?share_source=copy_web&vd_source=0c211e12ad1b45ed8f807de27691bac9)
     - ![[Pasted image 20260201001829.png]]
