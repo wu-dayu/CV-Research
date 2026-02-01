@@ -14,7 +14,7 @@
 - **年份/会刊：** {{2025}} /  #Arxiv
 - **领域标签：** #CV/{{底层}} 
 - **核心痛点 (Motivation)：**[DINOv2的weakness](https://docs.google.com/document/d/1CaADcs6hwx3n9SCqUfuVeMieiPUqMDzkomSHWTPnHe0/edit?tab=t.0)
-- **核心贡献 (Key Idea)：**
+- **核心贡献 (Key Idea)：** 提出DINOv3模型，将模型参数提升到7B级别，使用极其大量的数据自监督训练出可以广泛提取语义信息和dense feature的全能backbone
 - **代码仓库：** [GitHub Link](https://github.com/facebookresearch/dinov3)
 - **是否值得精读：** 🟢 必读 
 
@@ -132,7 +132,7 @@ def forward(self, x):
 		- ![[Pasted image 20260127214800.png]]
 	- [[RoPE]] & [[RoPE-box Jittering]]
 			Section 3.2 Update Model Architecture中讲的是模型如何理解图像中各个部分（Patch）的**位置关系**。
-		- [【硬核】手撕RoPE旋转位置编码推导，嘎嘎简单，通俗易懂! from Bilibili]（https://www.bilibili.com/video/BV1FjrCBdESo/?share_source=copy_web&vd_source=0c211e12ad1b45ed8f807de27691bac9）
+		- [【硬核】手撕RoPE旋转位置编码推导，嘎嘎简单，通俗易懂! from Bilibili](https://www.bilibili.com/video/BV1FjrCBdESo/?share_source=copy_web&vd_source=0c211e12ad1b45ed8f807de27691bac9)
 		- RoPE Jittering 公式与逻辑解析 （长）
 			在 DINOv3 中，RoPE 的核心是将 Patch 的 2D 坐标 映射为 复数旋转。为了让你彻底理解 Jittering 是如何进入公式的，我们分三步拆解。
 			### 1. 基础：2D RoPE 的数学表达

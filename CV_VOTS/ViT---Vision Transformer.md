@@ -85,7 +85,8 @@
 	    - ![[Pasted image 20260121152120.png]]
 	    - MHA和MHSA中的可学习参数
 		    - 将输入映射到Query Key Value空间的三个矩阵, h为注意力头数$$W^Q\quad W^K\quad W^V \in (d_{model},d_{k}=d_{model}/h)$$
-		    - 输出矩阵$$W^O\in (d_{model}, d_{model})$$$$Output=Concat(\sum_i head_i)W^O$$
+		    - 输出矩阵$$W^O\in (d_{model}, d_{model})$$$$Output=Concat(\sum_i head_i)W^O$$$$Output=\sum_{i=1}^h(Attention(Q_i,K_i,V_i)\cdot W_i^O)$$
+			
 - [ ] **遇到的坑：**
     
 - [ ] 准备问师兄的问题：
