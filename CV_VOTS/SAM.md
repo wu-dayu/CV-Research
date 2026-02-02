@@ -25,8 +25,9 @@
 ---
 
 ## 2. 核心架构与数据流 (Architecture & Data Flow)/内容整理
-【最强图像分割模型SAM讲解，从原理到应用！！】 https://www.bilibili.com/video/BV1DV4y1U7eN/?share_source=copy_web&vd_source=0c211e12ad1b45ed8f807de27691bac9
+
 - 内容整理
+	- [最强图像分割模型SAM讲解，从原理到应用！！ Bilibili](https://www.bilibili.com/video/BV1DV4y1U7eN/?share_source=copy_web&vd_source=0c211e12ad1b45ed8f807de27691bac9)
 	1. Introduction
 		- 要求：The model must support flexible prompts, needs to compute masks in amortized real-time to allow interactive use, and must be ambiguity-aware.
 		- 解决办法/大致架构：Surprisingly, we find that a simple design satisfies all three constraints: **a powerful image encoder** computes an image embedding, **a prompt encoder** embeds prompts, and then the two information sources are combined in **a lightweight mask decoder** that predicts segmentation masks.
@@ -77,7 +78,7 @@
 			- 利用zoomed-in image crops to further improve the quality of smaller masks.
 			11M images and 1.1B high-quality masks.
 	- [Section5-8 论文章节解析 by Gemini](https://docs.google.com/document/d/11cVCAHfS5bJQFjm9RLa3GF56lSPaWaqGK8s9mrozTWk/edit?tab=t.0)
-	- - [Appendix A 细节概括](https://docs.google.com/document/d/1z3Xk7pSH_hcLOGNlLCStdZdXa4AIS3UVaSG8DOG3TGY/edit?tab=t.0)
+	- [Appendix A 细节概括](https://docs.google.com/document/d/1z3Xk7pSH_hcLOGNlLCStdZdXa4AIS3UVaSG8DOG3TGY/edit?tab=t.0)
 ---
 
 ## 3. 深度技术检查清单 (Direction-Specific Checklist)
