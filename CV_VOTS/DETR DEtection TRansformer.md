@@ -41,8 +41,8 @@
   ![[Pasted image 20260131130510.png]]![[Pasted image 20260131130638.png]]
 	Encoder重复六次 Decoder重复；**Object Queries其实是learnable positional embedding**
    ![[Pasted image 20260131145215.png]]
-   **左下方是Object Queries的自注意力操作（主要为了移除冗余框），在第一层可以省略！** 但在后面的层不能省略
-   “Then, the decoder receives queries (initially set to zero), output positional encoding (object queries), and encoder memory, and produces the final set of predicted class labels and bounding boxes through multiple multihead self-attention and decoder-encoder attention. The first self-attention layer in the first decoder layer can be skipped.” (Carion 等, 2020, p. 22)
+   **右下方是Object Queries的自注意力操作（主要为了移除冗余框），在第一层可以省略！** 但在后面的层不能省略
+   “Then, the decoder receives queries (initially set to zero), output positional encoding (object queries), and encoder memory, and **produces the final set of predicted class labels and bounding boxes** through multiple multihead self-attention and decoder-encoder attention. The first self-attention layer in the first decoder layer can be skipped.” (Carion 等, 2020, p. 22)
    全部用于预测的FFN共享参数
 - Auxiliary decoding loss
 	- “We found helpful to use auxiliary losses [1] in decoder during training, especially to help the model output the correct number of objects of each class. We add prediction FFNs and Hungarian loss after each decoder layer” (Carion 等, 2020, p. 7)
