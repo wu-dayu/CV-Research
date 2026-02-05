@@ -18,7 +18,7 @@
     - 匹配过程具有不稳定性，尤其在训练初期，query 可能频繁切换匹配的目标，导致梯度方向紊乱 。
 - **核心贡献 (Key Idea)：**
     - DINO 在 DN-DETR 和 DAB-DETR 的基础上提出了三个关键创新，显著提升了精度和收敛速度。
-- **代码仓库：** [GitHub Link]
+- **代码仓库：** [GitHub Link](https: //github.com/IDEACVR/DINO.)
 - **是否值得精读：** 🟢 必读 / 🟡 略读 / 🔴 仅作参考
 
 ---

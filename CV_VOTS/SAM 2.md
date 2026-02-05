@@ -108,10 +108,6 @@ def forward(self, x):
     - [[Skip Connections]]（跳跃连接 / 残差连接）
 		- **逻辑功能**：在神经网络中，信息通常是逐层传递并逐渐抽象化的。Skip connection 允许低层（包含更多细节）的信息绕过中间复杂的计算层（这里是绕过了 Memory Attention），直接到达高层（Mask Decoding）。
 		- **意义**：防止空间细节在长距离的注意力计算中丢失。
-- [ ] **遇到的坑：** 
-    
-- [ ] 准备问师兄的问题：
-    
 ---
 
 ## 6. 关联阅读与总结 (Summary & Links)
