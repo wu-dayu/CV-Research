@@ -44,7 +44,7 @@
 				- 其中使用了诸如look-forward twice的增强方法 [[DINO Detection]]
 			- **Semantic Head:** “we also have a semantic segmentation head, which predicts a binary label for every pixel in the image, indicating whether or not it corresponds to the prompt.” (Carion 等, 2025, p. 4)
 				对Conditioned Image Features进行上采样，通过一个简单的卷积层直接观测H×W的概率图。不区分具体的个体，只回答“哪些像素属于这个Concept”
-				- **semantic and the **instance mask** share the same segmentation head
+				- **semantic and the instance mask** share the same segmentation head
 			- **Presence Token：** Decouple the recognition and localization process, 因为recognition需要contextual cues from the entire image，对于queries是"counterproductive"的，因此引入presence token
 				- $$p(query_i\text{ matches NP})=p(query_i\text{ matches NP|  NP appears in image}\cdot p(\text{NP appears in image})$$
 					- $p(\text{NP appears in image)}$: *presence token*, which is added to our decoder and then fed through an MLP classification head.

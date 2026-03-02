@@ -58,7 +58,7 @@
 			- 原理：“Our modified decoder block uses prompt self-attention and cross-attention in two directions (prompt-to-image embedding and vice-versa) to update all embeddings. After running two blocks, we upsample the image embedding and an MLP maps the output token to a dynamic linear classifier, which then computes the mask foreground probability at each image location.” (Kirillov 等, 2023, p. 5)
 			-  **Appendix A: Details of the lightweight mask decoder**
 				![[Pasted image 20260201230850.png|400]]
-		- Resolving Ambiguity: Predicting multiple valid masks (three) ***whole part and subpart***, only backpop the minimum loss over masks. **Confidence score (i.e. estimated IoU) for each mask** to rank masks of different scales.
+		- Resolving Ambiguity: Predicting multiple valid masks (three) ***whole part and subpart***, only backpop the minimum loss over masks. **Confidence score (i.e. estimated IoU) for each mask** to rank masks of different scales. [IoU的计算](https://docs.google.com/document/d/1huPc6sKeRlC-PhzettzSWN1BjcC9qsCiYW_gG04n4FI/edit?tab=t.0)
 		- Loss function: linear combination of **focal loss** and **dice loss**
 	4. Segment Anything Data Engine
 		- Assisted-manual stage: 
