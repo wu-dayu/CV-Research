@@ -47,43 +47,22 @@
 				- **解决遮挡（Occlusion）**：即使当前帧物体被挡住了，Cross-attention 也能通过检索记忆库，发现“虽然我现在看不清，但根据之前的记忆，这里应该是那个物体的边缘”。
 			    - **响应提示（Prompting）**：如果你在第一帧点了一个点，这个点的信息会被存入记忆。Cross-attention 会确保当前帧的特征能够持续受到这个“点”的影响。
 		- **Prompt Encoder and Mask Decoder：** 结构大致和SAM一致
-				- Video Seg中允许出现no valid mask的情况，因此 we add an additional head that predicts whether the object of interest is present on the current frame.
-				- 为提升分割精细度，使用了[[Skip Connections]], 加入了来自编码器的 **High-resolution embeddings**（高分辨率嵌入），模型就能在确定“这是那个物体”之后，利用最清晰的特征把边缘精准地“吸附”在物体的实际轮廓上。
+			- Video Seg中允许出现no valid mask的情况，因此 we add an additional head that predicts whether the object of interest is present on the current frame.
+			- 为提升分割精细度，使用了[[Skip Connections]], 加入了来自编码器的 **High-resolution embeddings**（高分辨率嵌入），模型就能在确定“这是那个物体”之后，利用最清晰的特征把边缘精准地“吸附”在物体的实际轮廓上。
 		- **Memory Encoder:** 对output mask进行下采样，并于unconditioned frame embedding (from image encoder)逐元素求和，followed by light-weight convolutional layers to fuse the information.
 		- **Memory Bank：** 
-				- 存储**N recent frames** embedded with temporal position information(时序信息) to predict motion, **M prompted frames**和**object pointers** “**as lightweight vectors** for high-level semantic information of the object to segment, based on mask decoder output tokens of each frame.” (Ravi 等, 2024, p. 5)
-				- Temporal position information的实现方式：相加$$Feature_{final}=Feature_{spatial}+Pos_{spatial}+Pos_{temporal}$$
+			- 存储**N recent frames** embedded with temporal position information(时序信息) to predict motion, **M prompted frames**和**object pointers** “**as lightweight vectors** for high-level semantic information of the object to segment, based on mask decoder output tokens of each frame.” (Ravi 等, 2024, p. 5)
+			- Temporal position information的实现方式：相加$$Feature_{final}=Feature_{spatial}+Pos_{spatial}+Pos_{temporal}$$
 
 ---
 
 ## 3. 深度技术检查清单 (Direction-Specific Checklist)
-
-### 🟢 分类/骨干网络 (Classification/Backbone)
-- [ ] **Basic Block:** 最小重复单元长什么样？(残差结构/Transformer Block/Ghost Block?)
-- [ ] **特征提取:** 它是如何权衡局部特征（Conv）和全局特征（Attention）的？
-- [ ] **降采样:** 图像分辨率是如何一步步缩小的？(Stride Conv / Pooling / Patch Merging?)
-- [ ] **性能指标:** 参数量 (Params) 和计算量 (FLOPs) 处于什么量级？
-
-### 🔵 目标检测 (Object Detection)
-- [ ] **Neck & Head:** 它是如何融合多尺度特征的？(FPN, PAN, BiFPN 等)
-- [ ] **检测范式:** 是预设固定框 (Anchor-based) 还是直接预测中心 (Anchor-free)？
-- [ ] **损失函数:** 分类 Loss (如 Focal Loss) 和回归 Loss (如 GIoU/DIoU) 分别是什么？
-- [ ] **后处理:** 是否需要 NMS 过滤重复框？还是 End-to-end (如 DETR/RT-DETR)?
 
 ### 🟣 图像分割 (Segmentation)
 - [ ] **解耦方式:** 它是如何从低分辨率恢复到高分辨率的？(上采样/反卷积/Skip Connection?)
 - [ ] **分类粒度:** 它是如何实现像素级 (Pixel-wise) 精准分类的？
 - [ ] **边界处理:** 对物体的边缘和细节处是否有特殊的优化处理？
 
-### 🟠 底层视觉/增强 (Low-level Vision)
-- [ ] **数据来源:** 训练数据是人工合成的（加噪/降采样）还是真实采集的？
-- [ ] **图像先验:** 利用了什么图像知识？(如平滑性、稀疏性、非局部自相似性等)
-
-- **数据归纳偏差 (Inductive Bias)**：Transformer 相比 CNN 缺少平移不变性，这篇论文是如何补偿这一点的？（例如：Position Encoding）
-    
-- **计算复杂度**：该模型的瓶颈是在图像编码器（Encoder）还是提示解码器（Decoder）？这决定了它在实时部署时的表现。
-    
-- **损失函数函数形式**：为什么作者选择了这个特定的组合（如 Dice Loss + Focal Loss）？
 
 ---
 

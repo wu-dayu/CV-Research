@@ -42,10 +42,10 @@
 		 An image encoder, a flexible prompt encoder and a fast mask decoder, built on **Vision Transformer**
 		- **Image Encoder**: An MAE pre-trained ViT minimally adapted to process high resolution inputs.
 			- Appendix:
-				- A ViT-H/16 with 14×14 attention and 4 equally-spaced global attention blocks.
-				- Output is a **16× downscaled** emvedding of the input image ($\frac{H}{16},\frac{W}{16}$)
+				- A ViT-H/16 with 14×14 windowed attention and 4 equally-spaced global attention blocks.
+				- Output is a **16× downscaled** embedding of the input image ($\frac{H}{16},\frac{W}{16}$)
 				- A high number of image encoder FLOPs can be afforded because they're only conputed once per image.
-				- (1024,1024)->(64,64) with 256 channels.
+				- (1024,1024)->(64,64) with 256 channels. **此处不再用 [[ViT---Vision Transformer]] 中提出的CLS Token, 而是保留全部的4096个patch，通道数从ViT-H的隐藏层维数D=1280经卷积降维到256.**
 		- **Prompt Encoder**
 			- Sparse Prompts (points, boxes, text)
 				“We represent points and boxes by positional encodings [95] summed with learned embeddings for each prompt type and free-form text with an off-the-shelf text encoder from CLIP” (Kirillov 等, 2023, p. 5)
