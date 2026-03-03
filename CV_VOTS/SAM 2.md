@@ -37,7 +37,7 @@
 		- Memories of frames are created by the memory encoder based on the current prediction and placed in a memory bank. 相当于把memory编码成embedding，将在下一帧的memory attention中使用，集成了当前全部memories。
 		- The memory attention operation takes the per-frame embedding from the image encoder and conditions it on the memory bank, before the mask decoder ingests it to form a prediction. 见概念图
 		- ![[Pasted image 20260202214709.png]]
-		- **Image Encoder:**  an MAE pretrained Hiera image encoder, which is *hierarchical* allowing us to use multiscale features during decoding. For an arbitrarily long video, the image encoder only run **once** for the entire iteration and provide unconditioned tokens (feture maps) representing each frame. 
+		- **Image Encoder:**  *an MAE pretrained Hiera image encoder*, which is *hierarchical* allowing us to use multiscale features during decoding. For an arbitrarily long video, the image encoder only run **once** for the entire iteration and provide unconditioned tokens (feture maps) representing each frame. 
 		- **Memory attention:** Condition the current frame features on the past frames features and predictions as well as on any new prompts. L个transformer block. Each block performs **self-attention**, followed by **cross-attention** to memories of frames and object pointers (stored in memory bank).
 			- current frame **self-attention**进行空间建模与上下文理解，在不参考过去信息的情况下，先把当前这一帧的图像特征打磨得更精准。
 			- frame与memory bank cross-attention
@@ -53,6 +53,10 @@
 		- **Memory Bank：** 
 			- 存储**N recent frames** embedded with temporal position information(时序信息) to predict motion, **M prompted frames**和**object pointers** “**as lightweight vectors** for high-level semantic information of the object to segment, based on mask decoder output tokens of each frame.” (Ravi 等, 2024, p. 5)
 			- Temporal position information的实现方式：相加$$Feature_{final}=Feature_{spatial}+Pos_{spatial}+Pos_{temporal}$$
+				**SAM2只为Memory Bank中最近的N帧添加 $Pos_{temporal}$ embedding**
+					解决的核心问题：运动感应 (Motion Awareness)
+					如果没有 $Pos_{temporal}$，记忆库里的一堆特征图对模型来说只是“一堆毫无顺序的照片”。
+					加入该项后，模型能够分辨出哪一张是 1 帧前的，哪一张是 5 帧前的。这使得模型能够理解**物体的运动趋势**，例如预测遮挡（Occlusion）发生后物体可能出现的空间位置，从而有效防止目标丢失。
 
 ---
 
