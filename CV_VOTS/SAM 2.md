@@ -44,9 +44,11 @@
 				- **Query (Q)**：来自当前帧（经过 Self-attention 增强后）的特征。
 			    - **Key (K) & Value (V)**：来自 **Memory Bank（记忆库）**。记忆库里存的是过去帧的特征、历史预测的掩码，以及你给出的提示（Prompts）。
 			    - 它让当前帧去“询问”记忆库：“我在之前见过这些特征吗？上个时刻这个物体在哪里？”
+			    - **使用2D spatial rotary positional embedding [[RoPE]]** in self-attention and cross-attention layers
 				- **解决遮挡（Occlusion）**：即使当前帧物体被挡住了，Cross-attention 也能通过检索记忆库，发现“虽然我现在看不清，但根据之前的记忆，这里应该是那个物体的边缘”。
 			    - **响应提示（Prompting）**：如果你在第一帧点了一个点，这个点的信息会被存入记忆。Cross-attention 会确保当前帧的特征能够持续受到这个“点”的影响。
 		- **Prompt Encoder and Mask Decoder：** 结构大致和SAM一致
+			- ![[Pasted image 20260304185640.png]]
 			- Video Seg中允许出现no valid mask的情况，因此 we add an additional head that predicts whether the object of interest is present on the current frame.
 			- 为提升分割精细度，使用了[[Skip Connections]], 加入了来自编码器的 **High-resolution embeddings**（高分辨率嵌入），模型就能在确定“这是那个物体”之后，利用最清晰的特征把边缘精准地“吸附”在物体的实际轮廓上。
 		- **Memory Encoder:** 对output mask进行下采样，并于unconditioned frame embedding (from image encoder)逐元素求和，followed by light-weight convolutional layers to fuse the information.
@@ -56,7 +58,8 @@
 				**SAM2只为Memory Bank中最近的N帧添加 $Pos_{temporal}$ embedding**
 					解决的核心问题：运动感应 (Motion Awareness)
 					如果没有 $Pos_{temporal}$，记忆库里的一堆特征图对模型来说只是“一堆毫无顺序的照片”。
-					加入该项后，模型能够分辨出哪一张是 1 帧前的，哪一张是 5 帧前的。这使得模型能够理解**物体的运动趋势**，例如预测遮挡（Occlusion）发生后物体可能出现的空间位置，从而有效防止目标丢失。
+					加入该项后，模型能够分辨出哪一张是 1 帧前的，哪一张是 5 帧前的。这使得模型能够理解**物体的运动趋势**，例如预测遮挡（Occlusion）发生后物体可能出现的空间位置，从而有效防止目标丢失。依靠occlusion token
+			- “Further, we project the memory features in our memory bank to a dimension of 64, and split the 256-dim object pointer into 4 tokens of 64-dim for cross-attention to the memory bank.” (Ravi 等, 2024, p. 17)
 
 ---
 
@@ -96,7 +99,7 @@ def forward(self, x):
 ## 6. 关联阅读与总结 (Summary & Links)
 
 - **上一代工作：** [[SAM]] 
-	- 缺乏记忆模块；每帧独立预测，无时序关联；推理速度（ViT-H 骨干）在处理高帧率视频时显得过慢。
+	- 缺乏记忆模块；每帧独立预测，无时序关联；推理速度（ViT-H 主干）在处理高帧率视频时显得过慢。
 - **核心对比：** 
     - **维度升级**：SAM 处理的是空间维度（$H \times W$）；SAM 2 处理的是时空维度($H \times W \times T$)
 	- **性能跃迁**：SAM 2 的图像推理速度比 SAM 快 **6 倍**（得益于更高效的 Hiera 编码器）。
