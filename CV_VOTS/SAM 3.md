@@ -7,7 +7,7 @@
 | **紫色** | **值得借鉴的代码/方法** | 实现细节，如“使用了 AdamW 优化器”、“学习率衰减策略”。         |
 | **橙色** | **不足/未来工作**    | 作者承认的限制（Limitations），这往往是你的选题切入点。        |
 | **灰色** | **背景/引用文献**    | 经典的参考文献，标记以后要去读。                         |
-| **青色** | **个人疑问/随笔**    | 自己读不懂的地方，待查阅资料或问导师。                      |
+|        | **个人疑问/随笔**    | 自己读不懂的地方，待查阅资料或问导师。                      |
 # 📄 [Paper Study] {{title}} {{date}}
 
 ## 1. 快速预览 (Quick Read - 10min)
@@ -29,7 +29,7 @@
 		- Users can segment all instances of a visual concept specified by a short noun phrase, image exemplars (positive or negative), or a combination of both.
 		- Prompt的类型：phrases，image exemplars
 	- Model结构
-		- The model consists of a detector and a tracker that **share a vision encoder.**
+		- The model consists of a detector and a tracker that **share a vision encoder (*shared* PE).**
 			- Detector is a **DETR-based** model conditioned on **text, geometry, and image exemplars.** 与DETR不同，这个detector进行开集匹配，本质上是 **"Text-Conditioned Class-Agnostic Proposal Generator" (基于文本条件的类别无关候选生成器)**
 			- 这个detector预测 **是否匹配当前Prompt**，输入包括图像 *I* 和Prompt Embedding *T* (来自Concept Encoder)$$Output=Sigmoid(Score(q,T))$$query的语义完全由Prompt动态定义, Query仅当视觉特征与text prompt共振时得到高得分
 			- $$P_{final}=P_{presence}(I,T)*P_{los}(q_i|I,T)$$
@@ -42,7 +42,7 @@
 				- 其中使用了诸如look-forward twice的增强方法 [[DINO Detection]]
 			- **Semantic Head:** “we also have a semantic segmentation head, which predicts a binary label for every pixel in the image, indicating whether or not it corresponds to the prompt.” (Carion 等, 2025, p. 4)
 				对Conditioned Image Features进行上采样，通过一个简单的卷积层直接观测H×W的概率图。不区分具体的个体，只回答“哪些像素属于这个Concept”
-				- **semantic and the instance mask** share the same segmentation head
+				- **semantic and the instance mask** share the **same segmentation head**
 			- **Presence Token：** Decouple the recognition and localization process, 因为recognition需要contextual cues from the entire image，对于queries是"counterproductive"的，因此引入presence token
 				- $$p(query_i\text{ matches NP})=p(query_i\text{ matches NP|  NP appears in image}\cdot p(\text{NP appears in image})$$
 					- $p(\text{NP appears in image)}$: *presence token*, which is added to our decoder and then fed through an MLP classification head.
@@ -52,15 +52,16 @@
 					
 		- **Tracker**: 
 			- Tracker结合当前帧和memory bank中的以前帧预测同时存在于当前帧和以前帧中的object并生成掩码
-			- inheritted from SAM 2 **memory attention** and **decoder** module to propagate the masks
+			- inheritted from SAM 2 **memory attention** and **decoder** module to propagate the masks, 包括**prompt encoder, mask decoder, memory encoder, and memory bank**
+				- **Memory encoder 的结构：**
+					- The memory encoder is a transformer with self-attention across visual features on the current frame and cross-attention from the visual features to the spatial memory features in the memory bank.
 			- **subtle improvements have been indicated** see appendix C.3 Video Implementation Details
 			
 		- **Masklet Matcher:** 引入匹配函数 Merge existing and newly detected masks: simple IoU based matching function” (Carion 等, 2025, p. 5)
 - **模型结构图：**
   ![[Pasted image 20260206232103.png]]
-- ![[Pasted image 20260206232115.png]]
-- **张量变化 (Tensor Shapes)：**
-    -
+- ![[Pasted image 20260206232115.png|674]]
+	- fusion encoder <-> multimodal decoder
 
 ---
 
@@ -76,6 +77,8 @@
 
 ## 4. 数学表达与代码复现 (Math & Code)
 - **核心公式：**
+	$$\hat M_t=propogate(M_{t-1})\quad O_t=detect(I_t,P)\quad M_t=Match\_and\_Update(\hat M_t, O_t)$$
+	“On each frame, the detector finds new objects Ot and the tracker propagates masklets Mt−1 (spatial-temporal masks) from frames at the previous time t − 1 to their new locations Mˆ t on the current frame at time t. We use a matching function to associate propagated masklets Mˆ t with new object masks emerging in the current frame Ot,” (Carion 等, 2025, p. 4)
 
 - **代码核心逻辑 (GitHub Snippets)：**
 ```python
